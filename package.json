@@ -14,5 +14,8 @@
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/adorsk/cork/issues"
+  },
+  "devDependencies": {
+    "broccoli": "^0.15.3"
   }
 }
