@@ -1,0 +1,18 @@
+{
+  "name": "cork",
+  "version": "0.0.0",
+  "description": "Image manipulation experiments, inspired by the cork stamp paintings of Li Junyi",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adorsk/cork.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adorsk/cork/issues"
+  }
+}
