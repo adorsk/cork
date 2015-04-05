@@ -48,16 +48,13 @@ class CanvasIterator {
         let y0 = this._y;
         let y1 = Math.min(y0 + this.opts.tileHeight - 1, this.canvas.height);
 
-        var curTileHeight = x1 - x0;
-        var curTileWidth = y1 - y0;
-
         // Get data for tile.
-        let pixelData = this.ctx.getImageData(x0, y0, curTileWidth, curTileHeight).data;
+        let pixelData = this.ctx.getImageData(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1)).data;
         let pixelIdx = 0;
         let rows = [];
-        for (let y=y0; y < y1; y++ ){
+        for (let y=y0; y <= y1; y++ ){
             let row = [];
-            for (let x=x0; x < x1; x++) {
+            for (let x=x0; x <= x1; x++) {
                 var rgba = [];
                 for (var i=0; i<4; i++) {
                     rgba.push(pixelData[pixelIdx+i]);
