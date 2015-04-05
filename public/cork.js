@@ -1,13 +1,13 @@
 /**
- * CanvasIterator: takes a canvas.
- * next() function returns tiles of pixel
- * data, starting from the top-left, and going
- * left-to-right, top-to-bottom.
- * When canvas has been iterated through, next returns
- * 'true' for first value.
- * Otherwise, returns 'false' and a matrix of pixel data
- * for the current tile.
- */
+* CanvasIterator: takes a canvas.
+* next() function returns tiles of pixel
+* data, starting from the top-left, and going
+* left-to-right, top-to-bottom.
+* When canvas has been iterated through, next returns
+* 'true' for first value.
+* Otherwise, returns 'false' and a matrix of pixel data
+* for the current tile.
+*/
 class CanvasIterator {
     constructor(canvas, opts) {
         this.canvas = canvas;
@@ -43,35 +43,33 @@ class CanvasIterator {
         }
 
         // Get tile bounds.
-        let x0 = this._x;
-        let x1 = Math.min(x0 + this.opts.tileWidth - 1, this.canvas.width);
-        let y0 = this._y;
-        let y1 = Math.min(y0 + this.opts.tileHeight - 1, this.canvas.height);
+        var x0 = this._x;
+        var x1 = Math.min(x0 + this.opts.tileWidth - 1, this.canvas.width);
+        var y0 = this._y;
+        var y1 = Math.min(y0 + this.opts.tileHeight - 1, this.canvas.height);
 
         // Get data for tile.
-        let pixelData = this.ctx.getImageData(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1)).data;
-        let pixelIdx = 0;
-        let rows = [];
-        for (let y=y0; y <= y1; y++ ){
-            let row = [];
-            for (let x=x0; x <= x1; x++) {
+        var pixelData = this.ctx.getImageData(x0, y0, (x1 - x0 + 1), (y1 - y0 + 1)).data;
+        var pixelIdx = 0;
+        var pixels = [];
+        for (var y=y0; y <= y1; y++ ){
+            for (var x=x0; x <= x1; x++) {
                 var rgba = [];
                 for (var i=0; i<4; i++) {
                     rgba.push(pixelData[pixelIdx+i]);
                 }
-                row.push(rgba);
+                pixels.push([[x,y],rgba]);
                 pixelIdx += 4;
             }
-            rows.push(row);
         }
 
         // Package tile data.
-        let tileData = {
+        var tileData = {
             x0: x0,
             x1: x1,
             y0: y0,
             y1: y1,
-            data: rows
+            pixels: pixels
         };
 
         // Update current coords.
@@ -79,6 +77,25 @@ class CanvasIterator {
 
         return [this._done, tileData];
 
+    }
+}
+
+/**
+ * Copy tile data to a canvas context.
+**/
+
+function copyTile(ctx, tileData) {
+    for (var i=0; i<tileData.pixels.length; i++) {
+        // Get pixel data.
+        var pixel = tileData.pixels[i];
+        var [x,y] = pixel[0];
+
+        // Copy pixel data.
+        var imgData = ctx.createImageData(1,1);
+        for (var j=0; j < 4; j++) {
+            imgData.data[j] = pixel[1][j];
+        }
+        ctx.putImageData(imgData,x,y);
     }
 }
 
@@ -93,17 +110,23 @@ function getImageCanvas(imageObj) {
 
 var imageObj = new Image();
 imageObj.onload = function() {
-    var canvas = getImageCanvas(this);
-    document.body.appendChild(canvas);
+    var srcCanvas = getImageCanvas(this);
+    document.body.appendChild(srcCanvas);
 
-    var canvasIterator = new CanvasIterator(canvas);
+    var tgtCanvas = document.createElement('canvas');
+    var tgtCtx = tgtCanvas.getContext('2d');
+    tgtCanvas.width = srcCanvas.width;
+    tgtCanvas.height = srcCanvas.height;
+    document.body.appendChild(tgtCanvas);
+
+    var canvasIterator = new CanvasIterator(srcCanvas);
     while(true) {
-        let [done, tileData] = canvasIterator.next();
+        var [done, tileData] = canvasIterator.next();
         if (done) {
-            console.log('done');
             break;
         }
-        console.log('td', tileData);
+        // @TODO: do processing here.
+        copyTile(tgtCtx, tileData);
     }
 };
 imageObj.src = '/testImages/testImage.jpg';
