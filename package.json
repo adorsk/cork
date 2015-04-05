@@ -16,6 +16,9 @@
     "url": "https://github.com/adorsk/cork/issues"
   },
   "devDependencies": {
-    "broccoli": "^0.15.3"
+    "broccoli": "^0.15.3",
+    "broccoli-babel-transpiler": "^5.0.0",
+    "broccoli-merge-trees": "^0.2.1",
+    "broccoli-static-compiler": "^0.2.1"
   }
 }

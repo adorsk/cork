@@ -33,7 +33,6 @@ ImageIterator.prototype.next = function() {
 
     // Get data for rectangle.
     var rectData = [];
-    for (var x=x0; x <
 
     // Update current coords.
     this._x = x1 + 1;
