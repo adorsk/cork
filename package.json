@@ -16,9 +16,14 @@
     "url": "https://github.com/adorsk/cork/issues"
   },
   "devDependencies": {
+    "babelify": "^6.0.1",
     "broccoli": "^0.15.3",
     "broccoli-babel-transpiler": "^5.0.0",
+    "broccoli-fast-browserify": "^0.2.5",
     "broccoli-merge-trees": "^0.2.1",
-    "broccoli-static-compiler": "^0.2.1"
+    "broccoli-static-compiler": "^0.2.1",
+    "browserify": "^9.0.7"
+  },
+  "dependencies": {
   }
 }
