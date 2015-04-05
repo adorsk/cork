@@ -1,43 +1,65 @@
-var outputCanvas = document.getElementById('myCanvas');
-var outputCtx = canvas.getContext('2d');
-
 /**
- * ImageIterator: takes an imageObject.
- * next() function returns rectangles of pixel
+ * CanvasIterator: takes a canvas.
+ * next() function returns tiles of pixel
  * data, starting from the top-left, and going
  * left-to-right, top-to-bottom.
- * When image has been iterated through, next returns
- * null.
+ * When canvas has been iterated through, next returns
+ * 'true' for first value.
+ * Otherwise, returns 'false' and a matrix of pixel data
+ * for the current tile.
  */
-class ImageIterator {
-    constructor(imageObj, opts) {
-        this.imageObj = imageObj;
+class CanvasIterator {
+    constructor(canvas, opts) {
+        this.canvas = canvas;
         // @TODO: hardcoded opts for now, 
         // take as options later.
         this.opts = {
-            rectWidth: 20,
-            rectHeight: 20
+            tileWidth: 20,
+            tileHeight: 20
         };
 
         this._x = 0;
         this._y = 0;
+        this._done = false;
     }
 
     next() {
-        // @TODO: check if past bounds.
+        if (this._done) {
+            return [this._done, null];
+        }
 
-        // Get rectangle bounds.
-        var x0 = this._x;
-        var x1 = Math.max(x0 + this.opts.rectWidth, this.imageObj.width);
-        var y0 = this._y;
-        var y1 = y0 + Math.max(this.opts.rectHeight, this.imageObj.height);
+        // Move to next row if past the edge.
+        if (this._x > this.canvas.width) {
+            this._x = 0;
+            this._y += this.opts.tileHeight;
+        }
 
-        // Get data for rectangle.
-        var rectData = [];
+        // If past the bottom edge, mark as done.
+        if (this._y > this.canvas.height) {
+            this._done = true;
+            return [this._done, null];
+        }
+
+        // Get tile bounds.
+        let x0 = this._x;
+        let x1 = Math.min(x0 + this.opts.tileWidth -1, this.canvas.width);
+        let y0 = this._y;
+        let y1 = y0 + Math.min(this.opts.tileHeight, this.canvas.height);
+
+        // Get data for tile.
+        let tileData = {
+            x0: x0,
+            x1: x1,
+            y0: y0,
+            y1: y1,
+            data: []
+        };
 
         // Update current coords.
         this._x = x1 + 1;
-        this._y = y1 + 1;
+
+        return [this._done, tileData];
+
     }
 }
 
@@ -47,11 +69,22 @@ function getImageCanvas(imageObj) {
     canvas.height = imageObj.height;
     var ctx = canvas.getContext('2d');
     ctx.drawImage(imageObj, 0, 0);
-    return imgCanvas;
+    return canvas;
 }
 
 var imageObj = new Image();
 imageObj.onload = function() {
     var canvas = getImageCanvas(this);
+    document.body.appendChild(canvas);
+
+    var canvasIterator = new CanvasIterator(canvas);
+    while(true) {
+        let [done, tileData] = canvasIterator.next();
+        if (done) {
+            console.log('done');
+            break;
+        }
+        console.log('td', tileData);
+    }
 };
 imageObj.src = '/testImages/testImage.jpg';
