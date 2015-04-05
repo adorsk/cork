@@ -3,12 +3,12 @@ var pickFiles = require('broccoli-static-compiler');
 var mergeTrees = require('broccoli-merge-trees');
 
 
-var jsTree = pickFiles('public', {
+var jsTree = pickFiles('public/', {
   srcDir: '/',
   files: ['**/*.js',],
-  destDir: '/public'
+  destDir: '/'
 });
 
 jsTree = esTranspiler(jsTree);
 
-module.exports = mergeTrees(['public/', jsTree]);
+module.exports = mergeTrees(['public/', jsTree], {overwrite: true});

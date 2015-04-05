@@ -9,35 +9,37 @@ var outputCtx = canvas.getContext('2d');
  * When image has been iterated through, next returns
  * null.
  */
-function ImageIterator(imageObj) {
-    this.imageObj = imageObj;
+class ImageIterator {
+    constructor(imageObj, opts) {
+        this.imageObj = imageObj;
+        // @TODO: hardcoded opts for now, 
+        // take as options later.
+        this.opts = {
+            rectWidth: 20,
+            rectHeight: 20
+        };
 
-    // @TODO: hardcoded opts for now, 
-    // take as options later.
-    this.opts = {
-        rectWidth: 20,
-        rectHeight: 20
-    };
+        this._x = 0;
+        this._y = 0;
+    }
 
-    this._x = 0;
-    this._y = 0;
-};
-ImageIterator.prototype.next = function() {
-    // @TODO: check if past bounds.
+    next() {
+        // @TODO: check if past bounds.
 
-    // Get rectangle bounds.
-    var x0 = this._x;
-    var x1 = Math.max(x0 + this.opts.rectWidth, this.imageObj.width);
-    var y0 = this._y;
-    var y1 = y0 + Math.max(this.opts.rectHeight, this.imageObj.height);
+        // Get rectangle bounds.
+        var x0 = this._x;
+        var x1 = Math.max(x0 + this.opts.rectWidth, this.imageObj.width);
+        var y0 = this._y;
+        var y1 = y0 + Math.max(this.opts.rectHeight, this.imageObj.height);
 
-    // Get data for rectangle.
-    var rectData = [];
+        // Get data for rectangle.
+        var rectData = [];
 
-    // Update current coords.
-    this._x = x1 + 1;
-    this._y = y1 + 1;
-};
+        // Update current coords.
+        this._x = x1 + 1;
+        this._y = y1 + 1;
+    }
+}
 
 function getImageCanvas(imageObj) {
     var canvas = document.createElement('canvas');
