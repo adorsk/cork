@@ -188,7 +188,8 @@ function corkifyTile(ctx, tileData) {
 
     // Generate noise with that luminosity.
     // @TODO: setup noise parameters for luminosity.
-    var noiseGen = new FastSimplexNoise();
+    var noiseGen = new FastSimplexNoise({
+    });
     for (var i=0; i<tileData.pixels.length; i++) {
         var pixel = tileData.pixels[i];
         var [x,y] = pixel[0];
@@ -202,6 +203,24 @@ function corkifyTile(ctx, tileData) {
         ctx.putImageData(imgData,x,y);
     }
     
+}
+
+function grayifyTile(ctx, tileData) {
+    for (var i=0; i<tileData.pixels.length; i++) {
+        var pixel = tileData.pixels[i];
+        var [x,y] = pixel[0];
+        var rgba = pixel[1];
+
+        var gray = (rgba[0]* 0.3) + (rgba[1]* 0.59) + (rgba[2]* .11);  
+
+        // Copy pixel data.
+        var imgData = ctx.createImageData(1,1);
+        for (var j=0; j < 3; j++) {
+            imgData.data[j] = gray;
+        }
+        imgData.data[3] = 255;
+        ctx.putImageData(imgData,x,y);
+    }
 }
 
 function getImageCanvas(imageObj) {
@@ -233,8 +252,9 @@ imageObj.onload = function() {
             //console.log('processing tile', tileData.x0, tileData.y0);
             // @TODO: do processing here.
             //copyTile(tgtCtx, tileData);
-            corkifyTile(tgtCtx, tileData);
-            setTimeout(processTile, 20);
+            //corkifyTile(tgtCtx, tileData);
+            grayifyTile(tgtCtx, tileData);
+            setTimeout(processTile, 5);
         }
     }
 
