@@ -1,3 +1,8 @@
+var FastSimplexNoise = require('fast-simplex-noise');
+
+var TILE_WIDTH = 5;
+var TILE_HEIGHT = 5;
+
 /**
 * CanvasIterator: takes a canvas.
 * next() function returns tiles of pixel
@@ -16,8 +21,8 @@ class CanvasIterator {
         // @TODO: hardcoded opts for now, 
         // take as options later.
         this.opts = {
-            tileWidth: 20,
-            tileHeight: 20
+            tileWidth: TILE_WIDTH,
+            tileHeight: TILE_HEIGHT
         };
 
         this._x = 0;
@@ -132,6 +137,42 @@ function rgbToHsl(r, g, b){
 }
 
 /**
+ * Converts an HSL color value to RGB. Conversion formula
+ * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+ * Assumes h, s, and l are contained in the set [0, 1] and
+ * returns r, g, and b in the set [0, 255].
+ *
+ * @param   Number  h       The hue
+ * @param   Number  s       The saturation
+ * @param   Number  l       The lightness
+ * @return  Array           The RGB representation
+ */
+function hslToRgb(h, s, l){
+    var r, g, b;
+
+    if(s == 0){
+        r = g = b = l; // achromatic
+    }else{
+        var hue2rgb = function hue2rgb(p, q, t){
+            if(t < 0) t += 1;
+            if(t > 1) t -= 1;
+            if(t < 1/6) return p + (q - p) * 6 * t;
+            if(t < 1/2) return q;
+            if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+            return p;
+        }
+
+        var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+        var p = 2 * l - q;
+        r = hue2rgb(p, q, h + 1/3);
+        g = hue2rgb(p, q, h);
+        b = hue2rgb(p, q, h - 1/3);
+    }
+
+    return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+}
+
+/**
  * Copy tile as if it was stamped on via cork stamp.
 **/
 function corkifyTile(ctx, tileData) {
@@ -140,19 +181,27 @@ function corkifyTile(ctx, tileData) {
     for (var i=0; i<tileData.pixels.length; i++) {
         // Get pixel data.
         var pixel = tileData.pixels[i];
-        var [h,s,l] = rgbToHsl(pixel[1]);
+        var [h,s,l] = rgbToHsl.apply(null, pixel[1]);
         totalLuminosity += l;
     }
     var avgLuminosity = totalLuminosity/tileData.pixels.length;
 
     // Generate noise with that luminosity.
-    /*
-    var imgData = ctx.createImageData(1,1);
-    for (var j=0; j < 4; j++) {
-        imgData.data[j] = pixel[1][j];
+    // @TODO: setup noise parameters for luminosity.
+    var noiseGen = new FastSimplexNoise();
+    for (var i=0; i<tileData.pixels.length; i++) {
+        var pixel = tileData.pixels[i];
+        var [x,y] = pixel[0];
+        var noise = (noiseGen.get2DNoise(x, y)+1)/2;
+        var rgba = hslToRgb(0,0,noise*avgLuminosity).concat([255]);
+
+        var imgData = ctx.createImageData(1,1);
+        for (var j=0; j < 4; j++) {
+            imgData.data[j] = rgba[j];
+        }
+        ctx.putImageData(imgData,x,y);
     }
-    ctx.putImageData(imgData,x,y);
-    */
+    
 }
 
 function getImageCanvas(imageObj) {
@@ -176,13 +225,20 @@ imageObj.onload = function() {
     document.body.appendChild(tgtCanvas);
 
     var canvasIterator = new CanvasIterator(srcCanvas);
-    while(true) {
+    function processTile() {
         var [done, tileData] = canvasIterator.next();
         if (done) {
-            break;
+            console.log('done');
+        } else{
+            //console.log('processing tile', tileData.x0, tileData.y0);
+            // @TODO: do processing here.
+            //copyTile(tgtCtx, tileData);
+            corkifyTile(tgtCtx, tileData);
+            setTimeout(processTile, 20);
         }
-        // @TODO: do processing here.
-        copyTile(tgtCtx, tileData);
     }
+
+    processTile();
 };
+imageObj.width = 300;
 imageObj.src = '/testImages/testImage.jpg';

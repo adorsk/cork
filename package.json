@@ -25,5 +25,6 @@
     "browserify": "^9.0.7"
   },
   "dependencies": {
+    "fast-simplex-noise": "^0.5.0"
   }
 }
